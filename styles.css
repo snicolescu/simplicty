@@ -1,0 +1,102 @@
+/* Game UI */
+.uibg {
+    background-color: rgb(49, 145, 255);
+}
+
+.uiheader {
+    background-color: rgb(0, 96, 185);
+}
+
+.gamebg {
+    background-color: rgb(219, 5, 5);
+}
+
+.card {
+    border: 0px;
+}
+
+#buildList a span {
+    margin-left: 5px;
+}
+
+/* Building common */
+#map {
+    border: 2px solid transparent;
+    border-color: lightgray;
+    width: fit-content;
+}
+
+#map a {
+    display: inline-block;
+    /* padding: 14px 0px; */
+    min-width: 32px;
+    min-height: 32px;
+    margin-bottom: 0;
+    font-family:"Courier New", Courier, monospace;
+    font-size: 14px;
+    font-weight: 600;
+    text-overflow: clip;
+    /* line-height: 1.42857143; */
+    text-align: center;
+    vertical-align: middle;
+    white-space: nowrap;
+    -ms-touch-action: manipulation;
+    touch-action: manipulation;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+
+    /* margin: 1px; */
+    /* text-shadow: 0 1px 0 #fff; */
+    border: 1px solid transparent;
+    /* border-color: rgb(0, 85, 146); */
+    border-color: rgb(27, 27, 27);
+    background-repeat: repeat-x;
+    color: white;
+}
+
+#map .under-construction {
+    border: 2px dotted;
+    border-color: rgb(187, 84, 0);
+}
+
+/* Building tiles */
+
+.empty {
+    background-color: rgb(129, 168, 92);
+}
+
+.park {
+    background-color: rgb(65, 95, 38);
+}
+
+.townhall {
+    background-image: linear-gradient(to bottom,rgb(255, 136, 1) 0,rgb(209, 129, 25) 100%);
+}
+
+.house {
+    background-image: linear-gradient(to bottom,rgb(255, 196, 1) 0,rgb(209, 166, 25) 100%);
+}
+.store {
+    background-image: linear-gradient(to bottom,rgb(1, 238, 255) 0,rgb(0, 159, 170) 100%);
+}
+
+.road {
+    background-color: rgb(141, 140, 140);
+}
+.water {
+    /* background-image: linear-gradient(to bottom,rgb(1, 99, 228) 0,rgb(21, 74, 143) 100%); */
+    background-image: linear-gradient(to bottom,rgb(49, 129, 235) 0,rgb(61, 89, 126) 100%);
+}
+
+/* Tile UI */
+#map .valid {
+    border-color: #106914;
+}
+
+#map .invalid {
+    border-color: #ad0303;
+}
