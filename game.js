@@ -283,7 +283,7 @@ var game = {
     },
     // Game UI
     onBuildChanged: function (b) {
-        if (this.unlimitedBuilding || (this.buildLimits[bla] > this.buildCounts[bla])) {
+        if (this.unlimitedBuilding || (this.buildLimits[b] > this.buildCounts[b])) {
             console.log("Now building: " + b);
             this.buildSelection = b;
         }

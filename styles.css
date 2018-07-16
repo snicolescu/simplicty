@@ -19,6 +19,10 @@
     margin-left: 5px;
 }
 
+#resources a {
+    margin-right: 5px;
+}
+
 /* Building common */
 #map {
     border: 2px solid transparent;
