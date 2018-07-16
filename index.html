@@ -1,6 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
 
-Hello ?!
+<!-- Boostrap -->
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB"
+    crossorigin="anonymous">
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+    crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+    crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T"
+    crossorigin="anonymous"></script>
+
+<link rel="stylesheet" type="text/css" href="./styles.css" />
+<script type='text/javascript' src='./tiles.js'> </script>
+<script type='text/javascript' src='./buildings.js'> </script>
+<script type='text/javascript' src='./game.js'> </script>
+
+
+<head></head>
+
+<body style="background-color: rgb(0, 85, 146)">
+
+    <div class="container-fluid">
+        <div class="row mt-2">
+            <div class="col-2">
+                <div class="card uibg">
+                    <div class="card-body">
+                        <button class="btn btn-default" onclick="saveGame();">Save</button>
+                        <button class="btn btn-default" onclick="loadGame();">Load</button>
+                        <button class="btn btn-default" onclick="clearMap();">Reset</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-10">
+                <div class="card uibg">
+                    <div id="resources" class="card-body ">
+                        <!-- <a href="#" class="btn btn-primary"> Peeps <span class="badge badge-dark"> 40 </span> </a> -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-2">
+            <div class="col-2">
+                <div class="card ">
+                    <h5 class="card-header uiheader">
+                        Build
+                        <input type="checkbox" onclick="game.buildall = !game.buildall" />
+                    </h5>
+                    <div class="card-body uibg">
+                        <div id="buildList" class="list-group list-group-flush">
+                        
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-8">
+                <div class="btn-group mb-1">
+                    <button id="endturn" type="button" class="btn btn-secondary" disabled>End Turn</button>
+                </div>
+                <div id="history" class="btn-group mb-1" role="group">
+                    <button type="button" class="btn btn-secondary" disabled>Turn History</button>
+                </div>
+                <div id="map">
+                </div>
+            </div>
+            <div class="col-2">
+                <div class="card ">
+                    <h5 id="buildingName" class="card-header uiheader">Info</h3>
+                    <div class="card-body uibg">
+                        <div id="buildingDetails" class="list-group">
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</body>
 
 </html>
