@@ -119,6 +119,12 @@ var game = {
             this.mapElem.appendChild(document.createElement("br"));
         }
         // init building type data
+        var cheatbuildButton = document.getElementById("cheatbuild");
+        this.unlimitedBuilding = false;
+        cheatbuildButton.onclick = function (e) {
+            game.toggleBuildall();
+            game.refresh();
+        }
         this.buildButtonsList = document.getElementById("buildList");
         this.buildLimits = {};
         this.buildCounts = {};
@@ -141,31 +147,30 @@ var game = {
                 countPill.className = "badge badge-dark badge-pill";
                 countPill.style.backgroundColor = buildingDefs[building].color;
                 buildButton.appendChild(countPill);
-                buildingDefs[building].countElem = countPill;            
+                buildingDefs[building].countElem = countPill;
             }
             // tile -> building map
-            for (var idx = 0; idx < 20; idx++){
-                var tileName = buildingDefs[building].tile + ( idx == 0 ? '': idx);
+            for (var idx = 0; idx < 20; idx++) {
+                var tileName = buildingDefs[building].tile + (idx == 0 ? '' : idx);
                 var tileDef = tileDefs[tileName];
-                if (tileDef){
+                if (tileDef) {
                     tileDef.building = building;
-                }else{
+                } else {
                     break;
                 }
             }
-            if (idx != 0){
+            if (idx != 0) {
                 buildingDefs[building].buildTime = idx - 1;
             }
             //
-            if ( !buildingDefs[building].hasOwnProperty("limit"))
+            if (!buildingDefs[building].hasOwnProperty("limit"))
                 buildingDefs[building].limit = 0;
             this.buildLimits[building] = 0;
             this.buildCounts[building] = 0;
         }
         $('#buildList a').on('click', function (e) {
             var bla = e.delegateTarget.getAttribute("building-type");
-            if (game.buildLimits[bla] > game.buildCounts[bla])
-                game.onBuildChanged(bla);
+            game.onBuildChanged(bla);
         });
         this.buildSelection = 'empty';
         //
@@ -173,17 +178,17 @@ var game = {
         this.buildingInfoPanel = document.getElementById("buildingDetails");
         // resources UI & stuff
         this.resources = {
-            "peeps":0,
-            "jobs":0,
+            "peeps": 0,
+            "jobs": 0,
         };
         var resourceClasses = {
-            "peeps":"btn-primary",
-            "jobs":"btn-secondary",
+            "peeps": "btn-primary",
+            "jobs": "btn-secondary",
         };
         this.resourcePills = {
         };
         var resourcesHolder = document.getElementById("resources");
-        for(var res in this.resources){
+        for (var res in this.resources) {
             //<a href="#" class="btn btn-primary"> Peeps <span class="badge badge-dark"> 40 </span> </a>
             var pill = document.createElement("span");
             this.resourcePills[res] = pill;
@@ -201,8 +206,8 @@ var game = {
         this.buildsPerTurn = 3;
         this.buildsThisTurn = 0;
         this.endTurnButton = document.getElementById("endturn");
-        this.endTurnButton.onclick = function(e) {
-            if (game.buildsPerTurn <= game.buildsThisTurn)
+        this.endTurnButton.onclick = function (e) {
+            if (game.buildsPerTurn <= game.buildsThisTurn || game.unlimitedBuilding)
                 game.endTurn();
         };
         //
@@ -232,15 +237,14 @@ var game = {
                 var tileDef = tileDefs[buildingType];
                 elem.className = tileDefs[buildingType].class
                 if (tileDef.hasOwnProperty("upgrade"))
-                    elem.classList.add( "under-construction" );
+                    elem.classList.add("under-construction");
                 else
-                    elem.classList.remove( "under-construction" );
+                    elem.classList.remove("under-construction");
                 elem.innerHTML = buildingType.toUpperCase();
             }
         }
         // build limits counts
-        for( var bld in buildingDefs)
-        {
+        for (var bld in buildingDefs) {
             var countPill = buildingDefs[bld].countElem;
             var buildButton = buildingDefs[bld].buttonElem;
             if (this.buildLimits[bld] > 0) {
@@ -249,7 +253,7 @@ var game = {
                     buildButton.classList.remove("disabled");
                     buildButton.classList.remove("list-group-item-secondary");
                     buildButton.classList.add("list-group-item-primary");
-                }else {
+                } else {
                     buildButton.classList.add("disabled");
                     buildButton.classList.add("list-group-item-secondary");
                     buildButton.classList.remove("list-group-item-primary");
@@ -260,27 +264,29 @@ var game = {
             }
         }
         // resource counts
-        for (var res in this.resources){
+        for (var res in this.resources) {
             this.resourcePills[res].innerHTML = this.resources[res];
         }
         // end turn button
-        if ( this.buildsThisTurn < this.buildsPerTurn){
-            this.endTurnButton.setAttribute("disabled", true);
-            this.endTurnButton.innerHTML = "End Turn " + this.buildsThisTurn + '/' + this.buildsPerTurn;
-        }else{
+        if (this.buildsThisTurn >= this.buildsPerTurn || this.unlimitedBuilding) {
             this.endTurnButton.removeAttribute("disabled");
             this.endTurnButton.innerHTML = "End Turn";
+        } else {
+            this.endTurnButton.setAttribute("disabled", true);
+            this.endTurnButton.innerHTML = "End Turn " + this.buildsThisTurn + '/' + this.buildsPerTurn;
         }
     },
     // 
-    toggleBuildall: function() {
-        this.buildall = !this.buildall;
-        //TODO: this doesn't do anyhthing
+    toggleBuildall: function () {
+        this.unlimitedBuilding = !this.unlimitedBuilding;
+        console.log("Unlimited building: " + this.unlimitedBuilding);
     },
     // Game UI
     onBuildChanged: function (b) {
-        console.log("Now building: " + b);
-        this.buildSelection = b;
+        if (this.unlimitedBuilding || (this.buildLimits[bla] > this.buildCounts[bla])) {
+            console.log("Now building: " + b);
+            this.buildSelection = b;
+        }
     },
 
     onBuildingClick: function (x, y) {
@@ -292,14 +298,14 @@ var game = {
         } else {
             elem.classList.add("invalid");
         }
-        this.displayBuildingDetails(x,y);
+        this.displayBuildingDetails(x, y);
     },
     onBuildingUnhovered: function (elem, x, y) {
         elem.classList.remove("valid");
         elem.classList.remove("invalid");
     },
-    displayBuildingDetails: function (x,y){
-        var building = this.getTileBuilding(x,y);
+    displayBuildingDetails: function (x, y) {
+        var building = this.getTileBuilding(x, y);
         var buildingDef = buildingDefs[building];
         this.buildingInfoPanel.innerHTML = buildingDef.description;
         this.buildingNameUI.innerHTML = building.toUpperCase();
@@ -352,7 +358,7 @@ var game = {
         for (y = 0; y < this.mapSize; y++) {
             for (x = 0; x < this.mapSize; x++) {
                 var tile = this.tiles[y][x];
-                if ( tileDefs[tile].hasOwnProperty("upgrade")) {
+                if (tileDefs[tile].hasOwnProperty("upgrade")) {
                     this.tiles[y][x] = tileDefs[tile].upgrade;
                 }
             }
@@ -362,10 +368,10 @@ var game = {
         this.refresh();
     },
     // Tiles & Buildings
-    getTileBuilding: function(x,y) {
-      return tileDefs[this.tiles[y][x]].building;
+    getTileBuilding: function (x, y) {
+        return tileDefs[this.tiles[y][x]].building;
     },
-    isBuildingInProgress: function(x,y) {
+    isBuildingInProgress: function (x, y) {
         return tileDefs[this.tiles[y][x]].hasOwnProperty("upgrade");
     },
 
@@ -380,34 +386,35 @@ var game = {
     },
 
     canBuildHere: function (x, y) {
+        if (this.unlimitedBuilding)
+            return true;
         // check turn build limit
         if (this.buildsThisTurn >= this.buildsPerTurn)
             return false;
         // check build stocks
         var bld = this.buildSelection;
         if (this.buildCounts[bld] >= this.buildLimits[bld])
-            return false;       
+            return false;
         //
         if (buildingDefs[this.buildSelection].canBuild)
             return buildingDefs[this.buildSelection].canBuild(this, x, y);
         return this.isTileBuildable(x, y) == null;
-        //this.buildSelection;
     },
     placeBuilding: function (x, y) {
         var buildingDef = buildingDefs[this.buildSelection];
         this.tiles[y][x] = buildingDef.tile + (buildingDef.buildTime ? buildingDef.buildTime : '');
     },
     // Misc
-    workOutBuildLimits: function() {
+    workOutBuildLimits: function () {
         // limits
-        for(var bld in buildingDefs){
+        for (var bld in buildingDefs) {
             this.buildLimits[bld] = buildingDefs[bld].limit;
             this.buildCounts[bld] = 0;
         }
         // counts
         for (y = 0; y < this.mapSize; y++) {
             for (x = 0; x < this.mapSize; x++) {
-                var building = this.getTileBuilding(x,y);
+                var building = this.getTileBuilding(x, y);
                 this.buildCounts[building] += 1;
             }
         }
@@ -415,16 +422,16 @@ var game = {
         buildingRules.buildLimits(this);
     },
     // Resources & Metrics
-    workOutResources: function() {
-        for(var res in this.resources){
+    workOutResources: function () {
+        for (var res in this.resources) {
             this.resources[res] = 0;
         }
         for (y = 0; y < this.mapSize; y++) {
             for (x = 0; x < this.mapSize; x++) {
-                var building = this.getTileBuilding(x,y);
-                var buildingDef = buildingDefs[building]; 
+                var building = this.getTileBuilding(x, y);
+                var buildingDef = buildingDefs[building];
                 if (buildingDef.hasOwnProperty("addResources") &&
-                    !this.isBuildingInProgress(x,y)) {
+                    !this.isBuildingInProgress(x, y)) {
                     buildingDef.addResources(this.resources);
                 }
             }
