@@ -80,12 +80,13 @@ var game = {
     start: function () {
         console.log("Game started");
         this.mapElem = document.getElementById("map");
-        this.mapSize = 16; // max is ~16 tiles
+        this.mapSize = 16; // max is ~28 tiles
+        this.viewingAttr = false;
+        this.buildall = false;
         // place tiles
         this.tileElems = [];
         this.tiles = [];
         this.attractiveness = [];
-        this.buildall = false;
         for (y = 0; y < this.mapSize; y++) {
             var rowElems = [];
             this.tileElems.push(rowElems);
@@ -118,6 +119,8 @@ var game = {
             }
             this.mapElem.appendChild(document.createElement("br"));
         }
+        // attractiveness info
+        this.attrElem = document.getElementById("attractiveness");
         // init building type data
         var cheatbuildButton = document.getElementById("cheatbuild");
         this.unlimitedBuilding = false;
@@ -229,6 +232,8 @@ var game = {
         console.log("Refreshing map");
         this.workOutResources();
         this.workOutBuildLimits();
+        this.workOutMetrics();
+        // under-construction
         for (y = 0; y < this.mapSize; y++) {
             for (x = 0; x < this.mapSize; x++) {
                 var elem = this.tileElems[y][x];
@@ -267,6 +272,8 @@ var game = {
         for (var res in this.resources) {
             this.resourcePills[res].innerHTML = this.resources[res];
         }
+        // attr display
+        this.refreshUtilityMaps();
         // end turn button
         if (this.buildsThisTurn >= this.buildsPerTurn || this.unlimitedBuilding) {
             this.endTurnButton.removeAttribute("disabled");
@@ -275,6 +282,23 @@ var game = {
             this.endTurnButton.setAttribute("disabled", true);
             this.endTurnButton.innerHTML = "End Turn " + this.buildsThisTurn + '/' + this.buildsPerTurn;
         }
+    },
+    refreshUtilityMaps:function() {
+        while (this.attrElem.firstChild) {
+            this.attrElem.removeChild(this.attrElem.firstChild);
+        }
+        var attrDocFrag = document.createDocumentFragment();
+        for (y = 0; y < this.mapSize; y++) {
+            for (x = 0; x < this.mapSize; x++) {
+                var tile = document.createElement("a");
+                var normVal = 10 + ((this.attractiveness[y][x] / 6) * 90);
+                tile.style.backgroundColor = "hsl(300, " + normVal + "%, 35%)";
+                tile.innerHTML = this.attractiveness[y][x];
+                attrDocFrag.appendChild(tile);
+            }
+            attrDocFrag.appendChild( document.createElement("br"));
+        }
+        this.attrElem.appendChild(attrDocFrag);
     },
     // 
     toggleBuildall: function () {
@@ -309,6 +333,16 @@ var game = {
         var buildingDef = buildingDefs[building];
         this.buildingInfoPanel.innerHTML = buildingDef.description;
         this.buildingNameUI.innerHTML = building.toUpperCase();
+    },
+    toggleShowAttractiveness: function () {
+        this.viewingAttr = !this.viewingAttr
+        if (this.viewingAttr) {
+            this.mapElem.style.display = 'none';
+            this.attrElem.style.display = 'block';
+        }else{
+            this.attrElem.style.display = 'none';
+            this.mapElem.style.display = 'block';
+        }
     },
     // History
     addHistoryEntry: function () {
@@ -371,10 +405,9 @@ var game = {
     getTileBuilding: function (x, y) {
         return tileDefs[this.tiles[y][x]].building;
     },
-    isBuildingInProgress: function (x, y) {
+    isUnderConstruction: function (x, y) {
         return tileDefs[this.tiles[y][x]].hasOwnProperty("upgrade");
     },
-
     isTileBuilt: function (x, y) {
         var b = this.tiles[y][x];
         var buildingType = tileDefs[b].class;
@@ -430,11 +463,34 @@ var game = {
             for (x = 0; x < this.mapSize; x++) {
                 var building = this.getTileBuilding(x, y);
                 var buildingDef = buildingDefs[building];
-                if (buildingDef.hasOwnProperty("addResources") &&
-                    !this.isBuildingInProgress(x, y)) {
-                    buildingDef.addResources(this.resources);
+                if (buildingDef.hasOwnProperty("resources") && 
+                    !this.isUnderConstruction(x, y)) {
+                    for( var resname in buildingDef.resources)
+                        this.resources[resname] += buildingDef.resources[resname];
                 }
             }
         }
+    },
+    workOutMetrics:function() {
+        //
+        for (y = 0; y < this.mapSize; y++) {
+            for (x = 0; x < this.mapSize; x++) {
+                var building = this.getTileBuilding(x, y);
+                if (buildingDefs[building].attractiveness)
+                    this.attractiveness[y][x] = buildingDefs[building].attractiveness;
+                else
+                    this.attractiveness[y][x] = 0;
+            }
+        }
+        // blur out
+        for(bla = 0; bla < 6; bla++)
+            for (y = 0; y < this.mapSize; y++) {
+                for (x = 0; x < this.mapSize; x++) {
+                    this.attractiveness[y][x] = Math.max(this.attractiveness[y][x], this.attractiveness[y][ Math.max(x-1, 0)] - 1 );
+                    this.attractiveness[y][x] = Math.max(this.attractiveness[y][x], this.attractiveness[y][ Math.min(x+1, this.mapSize - 1)] - 1 );
+                    this.attractiveness[y][x] = Math.max(this.attractiveness[y][x], this.attractiveness[ Math.max(y-1, 0)][x] - 1 );
+                    this.attractiveness[y][x] = Math.max(this.attractiveness[y][x], this.attractiveness[ Math.min(y+1, this.mapSize - 1)][x] - 1 );
+                }
+            }
     },
 }

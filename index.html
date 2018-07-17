@@ -47,17 +47,23 @@
                 <div class="card ">
                     <h5 class="card-header uiheader d-flex justify-content-between align-items-center">
                         Build
-                        <input id="cheatbuild" type="checkbox"/>
+                        <div>
+                            Cheat
+                            <input id="cheatbuild" type="checkbox" />
+                        </div>
                     </h5>
                     <div class="card-body uibg">
                         <div id="buildList" class="list-group list-group-flush">
-                        
+
                         </div>
                     </div>
                 </div>
 
             </div>
             <div class="col-8">
+                <div class="btn-group mb-1">
+                    <button id="attr" type="button" class="btn btn-secondary" style="background-color: hsl(300, 100%,30%)" onmouseover="game.toggleShowAttractiveness();" onmouseout="game.toggleShowAttractiveness();">A</button>
+                </div>
                 <div class="btn-group mb-1">
                     <button id="endturn" type="button" class="btn btn-secondary" disabled>End Turn</button>
                 </div>
@@ -66,15 +72,17 @@
                 </div>
                 <div id="map">
                 </div>
+                <div id="attractiveness" style="display: none">
+                </div>
             </div>
             <div class="col-2">
                 <div class="card ">
                     <h5 id="buildingName" class="card-header uiheader">Info</h3>
-                    <div class="card-body uibg">
-                        <div id="buildingDetails" class="list-group">
+                        <div class="card-body uibg">
+                            <div id="buildingDetails" class="list-group">
 
+                            </div>
                         </div>
-                    </div>
                 </div>
 
             </div>

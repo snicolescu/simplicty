@@ -24,18 +24,18 @@
 }
 
 /* Building common */
-#map {
+#map,#attractiveness {
     border: 2px solid transparent;
     border-color: lightgray;
     width: fit-content;
 }
 
-#map a {
+#map a, #attractiveness a {
     display: inline-block;
     /* padding: 14px 0px; */
     min-width: 32px;
-    min-height: 32px;
-    margin-bottom: 0;
+    line-height: 30px; /* this should be 32 - 2*vborder */
+
     font-family:"Courier New", Courier, monospace;
     font-size: 14px;
     font-weight: 600;
@@ -52,18 +52,17 @@
     -ms-user-select: none;
     user-select: none;
 
-
-    /* margin: 1px; */
     /* text-shadow: 0 1px 0 #fff; */
     border: 1px solid transparent;
     /* border-color: rgb(0, 85, 146); */
     border-color: rgb(27, 27, 27);
-    background-repeat: repeat-x;
+    background-repeat: no-repeat;
     color: white;
 }
 
 #map .under-construction {
-    border: 2px dotted;
+    border: 3px dotted;
+    line-height: 26px;
     border-color: rgb(187, 84, 0);
 }
 
@@ -98,9 +97,13 @@
 
 /* Tile UI */
 #map .valid {
+    border: 3px solid; 
     border-color: #106914;
+    line-height: 26px;
 }
 
 #map .invalid {
+    border: 3px solid; 
     border-color: #ad0303;
+    line-height: 26px;
 }
