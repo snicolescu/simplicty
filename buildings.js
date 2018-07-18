@@ -60,10 +60,8 @@ var buildingDefs = {
 
 var buildingRules = {
     buildLimits: function( game ) {
-        //TEMP
-        game.buildLimits['house'] += game.buildCounts['house'];
         //
-        game.buildLimits['park'] += Math.floor( game.buildCounts['house'] / 5 );
+        game.buildLimits['park'] += Math.floor( game.buildCounts['house'] / 8 );
         game.buildLimits['road'] += Math.floor( game.buildCounts['house']);
         //
         game.buildLimits['store'] += Math.floor(game.resources['peeps'] / 15);
