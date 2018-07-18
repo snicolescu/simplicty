@@ -309,19 +309,21 @@ var game = {
         while (this.attrElem.firstChild) {
             this.attrElem.removeChild(this.attrElem.firstChild);
         }
-        var houseSpawnGrid = new Array(this.mapSize*this.mapSize).fill(0);
-        for(var i = this.houseSpawns.length - 1; i >= 0;i--)
-            houseSpawnGrid[ this.houseSpawns[i][1] + this.mapSize*this.houseSpawns[i][2]] = i + 1;
+        var houseSpawnGrid = new Array(this.mapSize*this.mapSize).fill(10000);
+        for(var i = 0; i < this.houseSpawns.length;i++) {
+            var info = this.houseSpawns[i];
+            if (info[0] == 0)
+                break;
+            houseSpawnGrid[ info[1] + this.mapSize*info[2]] = i + 1;
+        }
         var attrDocFrag = document.createDocumentFragment();
         for (y = 0; y < this.mapSize; y++) {
             for (x = 0; x < this.mapSize; x++) {
                 var tile = document.createElement("a");
-                //var idx = houseSpawnGrid[x + y*this.mapSize];
-                //var normVal = 10 + ( (1 - idx / (this.mapSize*this.mapSize)) * 90);
-                var idx = Math.min(houseSpawnGrid[x + y*this.mapSize], 16);
-                var normVal = idx == 16 ? 0 : 40 + ( (1 - idx / 16) * 60);
-                tile.style.backgroundColor = "hsl(46, " + normVal + "%, 50%)";
-                tile.innerHTML = idx == 16 ? '.' : idx;
+                var idx = houseSpawnGrid[x + y*this.mapSize];
+                var normVal = idx == 10000 ? 10 : 20 + ( Math.max(1 - (idx / 7), 0) * 30);
+                tile.style.backgroundColor = "hsl(46, 100%," + normVal + "%)";
+                tile.innerHTML = normVal == 10 ? '.' : idx;
                 attrDocFrag.appendChild(tile);
             }
             attrDocFrag.appendChild( document.createElement("br"));
