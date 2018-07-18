@@ -80,9 +80,11 @@ var game = {
     start: function () {
         console.log("Game started");
         this.mapElem = document.getElementById("map");
-        this.mapSize = 16; // max is ~28 tiles
-        this.viewingAttr = false;
         this.buildall = false;
+        // game settings
+        this.mapSize = 16; // max is ~28 tiles
+        this.buildsPerTurn = 3;
+        this.newHousesToBuild = 3;
         // place tiles
         this.tileElems = [];
         this.tiles = [];
@@ -90,7 +92,7 @@ var game = {
         for (y = 0; y < this.mapSize; y++) {
             var rowElems = [];
             this.tileElems.push(rowElems);
-            var rowData = [];
+            var rowData = []; 
             this.tiles.push(rowData);
             var rowMetric = [];
             this.attractiveness.push(rowMetric);
@@ -115,12 +117,17 @@ var game = {
                 //
                 rowElems.push(tile);
                 rowData.push('e');
-                rowMetric.push(0);
             }
             this.mapElem.appendChild(document.createElement("br"));
         }
         // attractiveness info
         this.attrElem = document.getElementById("attractiveness");
+        $('#metricPreview button').mouseleave(function(e) {
+            game.displayMetric(undefined);
+        }).mouseenter(function(e) {
+            var mtr = e.delegateTarget.getAttribute("metric");
+            game.displayMetric(mtr);
+        });
         // init building type data
         var cheatbuildButton = document.getElementById("cheatbuild");
         this.unlimitedBuilding = false;
@@ -206,7 +213,6 @@ var game = {
             resourcesHolder.appendChild(resBtn);
         }
         //
-        this.buildsPerTurn = 3;
         this.buildsThisTurn = 0;
         this.endTurnButton = document.getElementById("endturn");
         this.endTurnButton.onclick = function (e) {
@@ -233,7 +239,8 @@ var game = {
         this.workOutResources();
         this.workOutBuildLimits();
         this.workOutMetrics();
-        // under-construction
+        this.workOutHouseSpawnOrder();
+        // under-construction UI
         for (y = 0; y < this.mapSize; y++) {
             for (x = 0; x < this.mapSize; x++) {
                 var elem = this.tileElems[y][x];
@@ -272,8 +279,6 @@ var game = {
         for (var res in this.resources) {
             this.resourcePills[res].innerHTML = this.resources[res];
         }
-        // attr display
-        this.refreshUtilityMaps();
         // end turn button
         if (this.buildsThisTurn >= this.buildsPerTurn || this.unlimitedBuilding) {
             this.endTurnButton.removeAttribute("disabled");
@@ -283,7 +288,7 @@ var game = {
             this.endTurnButton.innerHTML = "End Turn " + this.buildsThisTurn + '/' + this.buildsPerTurn;
         }
     },
-    refreshUtilityMaps:function() {
+    refreshAttractivenessMap:function() {
         while (this.attrElem.firstChild) {
             this.attrElem.removeChild(this.attrElem.firstChild);
         }
@@ -294,6 +299,29 @@ var game = {
                 var normVal = 10 + ((this.attractiveness[y][x] / 6) * 90);
                 tile.style.backgroundColor = "hsl(300, " + normVal + "%, 35%)";
                 tile.innerHTML = this.attractiveness[y][x];
+                attrDocFrag.appendChild(tile);
+            }
+            attrDocFrag.appendChild( document.createElement("br"));
+        }
+        this.attrElem.appendChild(attrDocFrag);
+    },
+    refreshBuildOrderMap:function() {
+        while (this.attrElem.firstChild) {
+            this.attrElem.removeChild(this.attrElem.firstChild);
+        }
+        var houseSpawnGrid = new Array(this.mapSize*this.mapSize).fill(0);
+        for(var i = this.houseSpawns.length - 1; i >= 0;i--)
+            houseSpawnGrid[ this.houseSpawns[i][1] + this.mapSize*this.houseSpawns[i][2]] = i + 1;
+        var attrDocFrag = document.createDocumentFragment();
+        for (y = 0; y < this.mapSize; y++) {
+            for (x = 0; x < this.mapSize; x++) {
+                var tile = document.createElement("a");
+                //var idx = houseSpawnGrid[x + y*this.mapSize];
+                //var normVal = 10 + ( (1 - idx / (this.mapSize*this.mapSize)) * 90);
+                var idx = Math.min(houseSpawnGrid[x + y*this.mapSize], 16);
+                var normVal = idx == 16 ? 0 : 40 + ( (1 - idx / 16) * 60);
+                tile.style.backgroundColor = "hsl(46, " + normVal + "%, 50%)";
+                tile.innerHTML = idx == 16 ? '.' : idx;
                 attrDocFrag.appendChild(tile);
             }
             attrDocFrag.appendChild( document.createElement("br"));
@@ -312,7 +340,6 @@ var game = {
             this.buildSelection = b;
         }
     },
-
     onBuildingClick: function (x, y) {
         this.tryBuildBuilding(x, y);
     },
@@ -334,12 +361,17 @@ var game = {
         this.buildingInfoPanel.innerHTML = buildingDef.description;
         this.buildingNameUI.innerHTML = building.toUpperCase();
     },
-    toggleShowAttractiveness: function () {
-        this.viewingAttr = !this.viewingAttr
-        if (this.viewingAttr) {
+    displayMetric: function (metric) {
+        //console.log("Display: " + metric);
+        if (metric == "attractiveness"){
+            this.refreshAttractivenessMap();
+            this.mapElem.style.display = 'none';
+            this.attrElem.style.display = 'block';    
+        } else if (metric == "houses"){
+            this.refreshBuildOrderMap();
             this.mapElem.style.display = 'none';
             this.attrElem.style.display = 'block';
-        }else{
+        } else {
             this.attrElem.style.display = 'none';
             this.mapElem.style.display = 'block';
         }
@@ -381,7 +413,7 @@ var game = {
     },
     tryBuildBuilding: function (x, y) {
         if (this.canBuildHere(x, y)) {
-            this.placeBuilding(x, y); // build selected building
+            this.placeBuilding( this.buildSelection, x, y); // build selected building
             this.buildsThisTurn += 1;
             this.refresh();
         }
@@ -397,7 +429,8 @@ var game = {
                 }
             }
         }
-        //
+        // spawn new residences
+        this.buildNewHouses(this.newHousesToBuild);
         this.buildsThisTurn = 0;
         this.refresh();
     },
@@ -417,8 +450,16 @@ var game = {
         var b = this.tiles[y][x];
         return b == 'e' ? null : b;
     },
-
+    isTileNextToRoad: function (x,y) {
+        var isIt = false;
+        isIt = isIt || this.tiles[y][ Math.max(x-1, 0)] == 'r';
+        isIt = isIt || this.tiles[y][ Math.min(x+1, this.mapSize - 1)] == 'r';
+        isIt = isIt || this.tiles[ Math.max(y-1, 0)][x] == 'r';
+        isIt = isIt || this.tiles[ Math.min(y+1, this.mapSize - 1)][x] == 'r';
+        return isIt;
+    },
     canBuildHere: function (x, y) {
+        //return this.isTileNextToRoad(x,y);
         if (this.unlimitedBuilding)
             return true;
         // check turn build limit
@@ -433,9 +474,16 @@ var game = {
             return buildingDefs[this.buildSelection].canBuild(this, x, y);
         return this.isTileBuildable(x, y) == null;
     },
-    placeBuilding: function (x, y) {
-        var buildingDef = buildingDefs[this.buildSelection];
+    placeBuilding: function (buildingType, x, y) {
+        var buildingDef = buildingDefs[buildingType];
         this.tiles[y][x] = buildingDef.tile + (buildingDef.buildTime ? buildingDef.buildTime : '');
+    },
+    buildNewHouses: function( count) {
+        for ( var i = count; i > 0; i--) {
+            var spawnDetails = this.houseSpawns.shift();
+            if (spawnDetails[0] != 0)
+                this.placeBuilding( "house", spawnDetails[1], spawnDetails[2]);
+        }
     },
     // Misc
     workOutBuildLimits: function () {
@@ -493,4 +541,33 @@ var game = {
                 }
             }
     },
+    workOutHouseSpawnOrder:function() {
+        // work out spawn order
+        this.houseSpawns = new Array();
+        var spawnVal = 0;
+        var middleCoord = this.mapSize/2;
+        for (y = 0; y < this.mapSize; y++) {
+            for (x = 0; x < this.mapSize; x++) {
+                spawnVal = (this.attractiveness[y][x] * (middleCoord + middleCoord + 2)) - Math.abs(x - middleCoord) - Math.abs( y - middleCoord);
+                if (this.isTileBuilt(x,y) || !this.isTileNextToRoad(x,y))
+                    spawnVal = 0;
+                this.houseSpawns.push( [ spawnVal, x, y] );
+            }
+        }
+        this.houseSpawns.sort( function(a,b) {
+            if (a[0] < b[0])
+                return 1;
+            if (a[0] > b[0])
+                return -1;
+            if (a[1] < b[1])
+                return 1;
+            if (a[1] > b[1])
+                return -1;
+            if (a[2] < b[2])
+                return 1;
+            if (a[2] > b[2])
+                return -1;
+            return 0;
+        });
+    }
 }

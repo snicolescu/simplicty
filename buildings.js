@@ -5,7 +5,6 @@ var buildingDefs = {
         description:"Holds peeps",
         isBuilding: true,
         resources: { 'peeps': 10 },
-        limit:3,
     },
     'store': {
         tile: 's',
