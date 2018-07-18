@@ -527,7 +527,7 @@ var game = {
             for (x = 0; x < this.mapSize; x++) {
                 var building = this.getTileBuilding(x, y);
                 if (buildingDefs[building].attractiveness)
-                    this.attractiveness[y][x] = buildingDefs[building].attractiveness;
+                    this.attractiveness[y][x] = buildingDefs[building].attractiveness + 1;// we add 1 so the value behaves intuitively, i.e. a value of 2 has a range of 2 tiles
                 else
                     this.attractiveness[y][x] = 0;
             }

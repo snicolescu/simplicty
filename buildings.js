@@ -19,7 +19,7 @@ var buildingDefs = {
         color: "rgb(255, 136, 1)",
         description:"Center of power",
         isBuilding: true,
-        attractiveness:5,
+        attractiveness:4,
         limit:1,
     },
     'park': {
@@ -27,7 +27,7 @@ var buildingDefs = {
         color: "rgb(65, 95, 38)",
         description:"Beatifies area",
         isBuilding: true,
-        attractiveness:3,
+        attractiveness:2,
         limit:5,
     },
     'road': {
