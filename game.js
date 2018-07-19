@@ -83,8 +83,8 @@ var game = {
         this.buildall = false;
         // game settings
         this.mapSize = 16; // max is ~28 tiles
-        this.buildsPerTurn = 3;
-        this.newHousesToBuild = 3;
+        this.buildsPerTurn = 3; // how many buildings can be placed in one turn
+        this.newHousesToBuild = 2; // # of residences that spawn/turn 
         // place tiles
         this.tileElems = [];
         this.tiles = [];
@@ -104,13 +104,13 @@ var game = {
                 tile.setAttribute("by", y);
                 // events
                 tile.onclick = function (e) {
-                    game.onBuildingClick(e.target.getAttribute("bx"), e.target.getAttribute("by"));
+                    game.onBuildingClick( Number(e.target.getAttribute("bx")), Number(e.target.getAttribute("by")));
                 };
                 tile.onmouseenter = function (e) {
-                    game.onBuildingHovered(e.target, e.target.getAttribute("bx"), e.target.getAttribute("by"));
+                    game.onBuildingHovered(e.target, Number(e.target.getAttribute("bx")), Number(e.target.getAttribute("by")));
                 }
                 tile.onmouseleave = function (e) {
-                    game.onBuildingUnhovered(e.target, e.target.getAttribute("bx"), e.target.getAttribute("by"));
+                    game.onBuildingUnhovered(e.target, Number(e.target.getAttribute("bx")), Number(e.target.getAttribute("by")));
                 }
                 //
                 this.mapElem.appendChild(tile);
@@ -128,6 +128,8 @@ var game = {
             var mtr = e.delegateTarget.getAttribute("metric");
             game.displayMetric(mtr);
         });
+        // amenities
+        this.amenities = new Map();
         // init building type data
         var cheatbuildButton = document.getElementById("cheatbuild");
         this.unlimitedBuilding = false;
@@ -140,6 +142,7 @@ var game = {
         this.buildCounts = {};
         //this.build //<span class="badge badge-dark"> 40 </span>
         for (var building in buildingDefs) {
+            var buildingDef = buildingDefs[building];
             // build buttons
             //<a class="list-group-item list-group-item-action active" data-toggle="list" href="#profile" >Home</a>
             var buildButton = document.createElement("a");
@@ -148,20 +151,20 @@ var game = {
             buildButton.href = "#bla";
             buildButton.innerHTML = '<b>' + building.toUpperCase() + '</b>';
             buildButton.className = "list-group-item list-group-item-action d-flex justify-content-between align-items-center";
-            //buildButton.style.color = buildingDefs[building].color;
+            //buildButton.style.color = buildingDef.color;
             this.buildButtonsList.appendChild(buildButton);
-            buildingDefs[building].buttonElem = buildButton;
+            buildingDef.buttonElem = buildButton;
             // build count pill
             {
                 var countPill = document.createElement("span");
                 countPill.className = "badge badge-dark badge-pill";
-                countPill.style.backgroundColor = buildingDefs[building].color;
+                countPill.style.backgroundColor = buildingDef.color;
                 buildButton.appendChild(countPill);
-                buildingDefs[building].countElem = countPill;
+                buildingDef.countElem = countPill;
             }
             // tile -> building map
             for (var idx = 0; idx < 20; idx++) {
-                var tileName = buildingDefs[building].tile + (idx == 0 ? '' : idx);
+                var tileName = buildingDef.tile + (idx == 0 ? '' : idx);
                 var tileDef = tileDefs[tileName];
                 if (tileDef) {
                     tileDef.building = building;
@@ -170,13 +173,20 @@ var game = {
                 }
             }
             if (idx != 0) {
-                buildingDefs[building].buildTime = idx - 1;
+                buildingDef.buildTime = idx - 1;
             }
-            //
-            if (!buildingDefs[building].hasOwnProperty("limit"))
-                buildingDefs[building].limit = 0;
+            // build limits
+            if (!buildingDef.hasOwnProperty("limit"))
+                buildingDef.limit = 0;
             this.buildLimits[building] = 0;
             this.buildCounts[building] = 0;
+            // amenities
+            if (buildingDef.amenities) {
+                for(var amty in buildingDef.amenities) {
+                    if (this.amenities[amty] === undefined)
+                        this.amenities[amty] = new Array( this.mapSize*this.mapSize);
+                }
+            } 
         }
         $('#buildList a').on('click', function (e) {
             var bla = e.delegateTarget.getAttribute("building-type");
@@ -239,6 +249,7 @@ var game = {
         this.workOutResources();
         this.workOutBuildLimits();
         this.workOutMetrics();
+        this.workOutAmenities();
         this.workOutHouseSpawnOrder();
         // under-construction UI
         for (y = 0; y < this.mapSize; y++) {
@@ -323,7 +334,24 @@ var game = {
                 var idx = houseSpawnGrid[x + y*this.mapSize];
                 var normVal = idx == 10000 ? 10 : 20 + ( Math.max(1 - (idx / 7), 0) * 30);
                 tile.style.backgroundColor = "hsl(46, 100%," + normVal + "%)";
-                tile.innerHTML = normVal == 10 ? '.' : idx;
+                tile.innerHTML = normVal == 10 ? '~' : idx;
+                attrDocFrag.appendChild(tile);
+            }
+            attrDocFrag.appendChild( document.createElement("br"));
+        }
+        this.attrElem.appendChild(attrDocFrag);
+    },
+    refreshAmenityMap:function(amty) {
+        while (this.attrElem.firstChild) {
+            this.attrElem.removeChild(this.attrElem.firstChild);
+        }
+        var attrDocFrag = document.createDocumentFragment();
+        var amtyArray = this.amenities[amty];
+        for (y = 0; y < this.mapSize; y++) {
+            for (x = 0; x < this.mapSize; x++) {
+                var tile = document.createElement("a");
+                tile.style.backgroundColor = amtyArray[x + y*this.mapSize] ? "rgb(1, 238, 255)" : "rgb(34,34,34)";
+                tile.innerHTML = '~';
                 attrDocFrag.appendChild(tile);
             }
             attrDocFrag.appendChild( document.createElement("br"));
@@ -359,9 +387,12 @@ var game = {
     },
     displayBuildingDetails: function (x, y) {
         var building = this.getTileBuilding(x, y);
-        var buildingDef = buildingDefs[building];
-        this.buildingInfoPanel.innerHTML = buildingDef.description;
         this.buildingNameUI.innerHTML = building.toUpperCase();
+        //
+        var buildingDef = buildingDefs[building];
+        var infoContent = buildingDef.description.slice();
+        //
+        this.buildingInfoPanel.innerHTML = infoContent;
     },
     displayMetric: function (metric) {
         //console.log("Display: " + metric);
@@ -371,6 +402,10 @@ var game = {
             this.attrElem.style.display = 'block';    
         } else if (metric == "houses"){
             this.refreshBuildOrderMap();
+            this.mapElem.style.display = 'none';
+            this.attrElem.style.display = 'block';
+        } else if (metric in this.amenities) {
+            this.refreshAmenityMap(metric);
             this.mapElem.style.display = 'none';
             this.attrElem.style.display = 'block';
         } else {
@@ -461,6 +496,7 @@ var game = {
         return isIt;
     },
     canBuildHere: function (x, y) {
+        //return this.hasAmenity("shopping",x,y);
         //return this.isTileNextToRoad(x,y);
         if (this.unlimitedBuilding)
             return true;
@@ -480,6 +516,10 @@ var game = {
         var buildingDef = buildingDefs[buildingType];
         this.tiles[y][x] = buildingDef.tile + (buildingDef.buildTime ? buildingDef.buildTime : '');
     },
+    hasAmenity: function(amty, x, y){
+        return this.amenities[amty][ x + y*this.mapSize] == true;
+    },
+    // Misc
     buildNewHouses: function( count) {
         for ( var i = count; i > 0; i--) {
             var spawnDetails = this.houseSpawns.shift();
@@ -487,7 +527,6 @@ var game = {
                 this.placeBuilding( "house", spawnDetails[1], spawnDetails[2]);
         }
     },
-    // Misc
     workOutBuildLimits: function () {
         // limits
         for (var bld in buildingDefs) {
@@ -533,15 +572,38 @@ var game = {
             }
         }
         // blur out
-        for(bla = 0; bla < 6; bla++)
-            for (y = 0; y < this.mapSize; y++) {
-                for (x = 0; x < this.mapSize; x++) {
+        for(var bla = 0; bla < 6; bla++)
+            for (var y = 0; y < this.mapSize; y++) {
+                for (var x = 0; x < this.mapSize; x++) {
                     this.attractiveness[y][x] = Math.max(this.attractiveness[y][x], this.attractiveness[y][ Math.max(x-1, 0)] - 1 );
                     this.attractiveness[y][x] = Math.max(this.attractiveness[y][x], this.attractiveness[y][ Math.min(x+1, this.mapSize - 1)] - 1 );
                     this.attractiveness[y][x] = Math.max(this.attractiveness[y][x], this.attractiveness[ Math.max(y-1, 0)][x] - 1 );
                     this.attractiveness[y][x] = Math.max(this.attractiveness[y][x], this.attractiveness[ Math.min(y+1, this.mapSize - 1)][x] - 1 );
                 }
             }
+    },
+    spreadAmenity: function(amty, range, cx, cy){
+        var amtyArray = this.amenities[amty];
+        var xmax = Math.min(this.mapSize, cx + range + 1);
+        var ymax = Math.min(this.mapSize, cy + range + 1);
+        for (var y = Math.max(0, cy - range) ; y < ymax; y++)
+            for (var x = Math.max(0, cx - range) ; x < xmax; x++)
+                amtyArray[x + y*this.mapSize] = true;
+    },
+    workOutAmenities:function() {
+        for(var amty in this.amenities)
+            this.amenities[amty].fill(false);
+        for (var y = 0; y < this.mapSize; y++) {
+            for (var x = 0; x < this.mapSize; x++) {
+                var bld = this.getTileBuilding(x,y);
+                bld = buildingDefs[bld];
+                if (bld.amenities && !this.isUnderConstruction(x,y)) {
+                    for(var amty in bld.amenities) {
+                        this.spreadAmenity(amty, bld.amenities[amty], x,y);                        
+                    }
+                }
+            }
+        }
     },
     workOutHouseSpawnOrder:function() {
         // work out spawn order

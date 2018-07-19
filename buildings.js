@@ -12,6 +12,7 @@ var buildingDefs = {
         description:"Gives peeps something to do",
         isBuilding: true,
         resources: { 'jobs': 5 },
+        amenities: { 'shopping': 3 },
         limit:1,
     },
     'townhall': {
@@ -56,7 +57,6 @@ var buildingDefs = {
         },
     },
 };
-
 
 var buildingRules = {
     buildLimits: function( game ) {
