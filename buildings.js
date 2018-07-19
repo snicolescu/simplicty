@@ -26,7 +26,7 @@ var buildingDefs = {
     'park': {
         tile: 'p',
         color: "rgb(65, 95, 38)",
-        description:"Beatifies area",
+        description:"Beautifies area",
         isBuilding: true,
         attractiveness:2,
         limit:5,

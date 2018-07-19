@@ -387,10 +387,20 @@ var game = {
     },
     displayBuildingDetails: function (x, y) {
         var building = this.getTileBuilding(x, y);
-        this.buildingNameUI.innerHTML = building.toUpperCase();
+        var titleContent = "<b>" + building.toUpperCase() + "</b>";
+        if (this.isUnderConstruction(x,y))
+            titleContent += "<div>Building...</div>";
+        this.buildingNameUI.innerHTML = titleContent; 
         //
         var buildingDef = buildingDefs[building];
         var infoContent = buildingDef.description.slice();
+        if (buildingDef.attractiveness)
+            infoContent += "<br><br> <b>Attractiveness: " + buildingDef.attractiveness + " </b>";
+        if (buildingDef.amenities){
+            for (var amty in buildingDef.amenities){
+                infoContent += "<br><br><b>" + amty.toUpperCase() + " " + buildingDef.amenities[amty] + "</b>";
+            }
+        }
         //
         this.buildingInfoPanel.innerHTML = infoContent;
     },
