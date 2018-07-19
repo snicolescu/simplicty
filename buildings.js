@@ -1,10 +1,18 @@
 var buildingDefs = {
-    'house': {
-        tile: 'h',
-        color: "rgb(209, 166, 25)",
-        description:"Holds peeps",
+    'road': {
+        tile: 'r',
+        color: "rgb(96, 96, 96)",
+        description:"Vroom",
         isBuilding: true,
-        resources: { 'peeps': 10 },
+        limit:5,
+    },
+    'park': {
+        tile: 'p',
+        color: "rgb(65, 95, 38)",
+        description:"Beautifies area",
+        isBuilding: true,
+        attractiveness:2,
+        limit:5,
     },
     'store': {
         tile: 's',
@@ -23,20 +31,18 @@ var buildingDefs = {
         attractiveness:4,
         limit:1,
     },
-    'park': {
-        tile: 'p',
-        color: "rgb(65, 95, 38)",
-        description:"Beautifies area",
-        isBuilding: true,
-        attractiveness:2,
-        limit:5,
+    'reserve': {
+        tile: 'x',
+        color: "rgb(141, 140, 140)",
+        description:"Save this tile for later building",
+        limit:3,
     },
-    'road': {
-        tile: 'r',
-        color: "rgb(96, 96, 96)",
-        description:"Vroom",
+    'house': {
+        tile: 'h',
+        color: "rgb(209, 166, 25)",
+        description:"Holds peeps",
         isBuilding: true,
-        limit:5,
+        resources: { 'peeps': 10 },
     },
     'water': {
         tile: 'w',

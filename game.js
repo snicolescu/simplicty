@@ -623,7 +623,7 @@ var game = {
         for (y = 0; y < this.mapSize; y++) {
             for (x = 0; x < this.mapSize; x++) {
                 spawnVal = (this.attractiveness[y][x] * (middleCoord + middleCoord + 2)) - Math.abs(x - middleCoord) - Math.abs( y - middleCoord);
-                if (this.isTileBuilt(x,y) || !this.isTileNextToRoad(x,y))
+                if (this.tiles[y][x] != 'e' || !this.isTileNextToRoad(x,y))
                     spawnVal = 0;
                 this.houseSpawns.push( [ spawnVal, x, y] );
             }

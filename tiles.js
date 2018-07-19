@@ -11,6 +11,9 @@ var tileDefs = {
     'th': {
         class: "townhall",
     },
+    'x': {
+        class: "reserve",
+    },
     'r': {
         class: "road",
     },
