@@ -1,4 +1,10 @@
 /* Game UI */
+/* 
+https://getbootstrap.com/docs/4.1/components/alerts/
+https://material.io/tools/icons/?icon=sentiment_satisfied&style=round
+http://google.github.io/material-design-icons/#getting-icons
+*/
+
 .uibg {
     background-color: rgb(49, 145, 255);
 }
@@ -15,12 +21,13 @@
     border: 0px;
 }
 
-#buildList a span {
+#buildList a span, #resources a {
     margin-left: 5px;
 }
 
-#resources a {
-    margin-right: 5px;
+.material-icons.happy {
+    color: orange;
+    text-shadow: 2px 2px rgba(0, 0, 0, .15);
 }
 
 /* Building common */

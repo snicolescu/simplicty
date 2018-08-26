@@ -40,15 +40,16 @@ var buildingDefs = {
     'house': {
         tile: 'h',
         color: "rgb(209, 166, 25)",
-        description:"Holds peeps",
         isBuilding: true,
+        description:"Holds peeps",
         resources: { 'peeps': 10 },
+        likes: ["shopping" ],
     },
     'water': {
         tile: 'w',
         color: "rgb(49, 153, 194)",
-        description:"Glug",
         isBuilding: false,
+        description:"Glug",
         canBuild: function (game, x, y) {
             return true;
         },

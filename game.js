@@ -391,6 +391,7 @@ var game = {
         if (this.isUnderConstruction(x,y))
             titleContent += "<div>Building...</div>";
         this.buildingNameUI.innerHTML = titleContent; 
+        //TODO: Show turns until finished. Use <i class="material-icons">access_time</i>
         //
         var buildingDef = buildingDefs[building];
         var infoContent = buildingDef.description.slice();
@@ -400,6 +401,10 @@ var game = {
             for (var amty in buildingDef.amenities){
                 infoContent += "<br><br><b>" + amty.toUpperCase() + " " + buildingDef.amenities[amty] + "</b>";
             }
+        }
+        var happiness = this.hasLikesMet(x,y);
+        if (happiness > 0){
+            infoContent += "<br><br>Happy <i class=\"material-icons happy \">sentiment_very_satisfied</i>"
         }
         //
         this.buildingInfoPanel.innerHTML = infoContent;
@@ -528,6 +533,19 @@ var game = {
     },
     hasAmenity: function(amty, x, y){
         return this.amenities[amty][ x + y*this.mapSize] == true;
+    },
+    hasLikesMet: function( x,y){ // Returns percentage likes met, or -1 if building doesn't need anything to be happy
+        var bld = this.getTileBuilding(x,y);
+        var def = buildingDefs[bld];
+        if (def.likes){
+            var maxLikes = def.likes.length;
+            var numLikes = 0;
+            for(var i = maxLikes - 1; i >= 0; i-- ) {
+                numLikes += this.hasAmenity( def.likes[i], x,y) ? 1 : 0;
+            }
+            return numLikes / maxLikes;
+        }
+        return -1;
     },
     // Misc
     buildNewHouses: function( count) {
