@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 
+<!-- Material Icons -->
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <!-- Boostrap -->
 <!-- Latest compiled and minified CSS -->
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB"
@@ -25,7 +27,7 @@
     <div class="container-fluid">
         <div class="row mt-2">
             <div class="col-2" align="center">
-                <div class="card uibg">
+                <div class="card shadow-sm uibg">
                     <div class="card-body">
                         <button class="btn btn-default" onclick="saveGame();">Save</button>
                         <button class="btn btn-default" onclick="loadGame();">Load</button>
@@ -34,7 +36,7 @@
                 </div>
             </div>
             <div class="col-6">
-                <div class="card uibg">
+                <div class="card shadow-sm uibg">
                     <div id="resources" class="card-body ">
                         <!-- <a href="#" class="btn btn-primary"> Peeps <span class="badge badge-dark"> 40 </span> </a> -->
                     </div>
@@ -44,7 +46,7 @@
 
         <div class="row mt-2" >
             <div class="col-2">
-                <div class="card ">
+                <div class="card shadow">
                     <h5 class="card-header uiheader d-flex justify-content-between align-items-center">
                         Build
                         <div>
@@ -53,7 +55,7 @@
                         </div>
                     </h5>
                     <div class="card-body uibg">
-                        <div id="buildList" class="list-group list-group-flush">
+                        <div id="buildList" class="list-group list-group-flush shadow">
 
                         </div>
                     </div>
@@ -72,13 +74,13 @@
                 <div id="history" class="btn-group mb-1" role="group">
                     <button type="button" class="btn btn-secondary" disabled>Turn History</button>
                 </div>
-                <div id="map">
+                <div id="map" class="shadow-lg">
                 </div>
                 <div id="attractiveness" style="display: none">
                 </div>
             </div>
             <div class="col-2">
-                <div class="card ">
+                <div class="card shadow">
                     <h5 id="buildingName" class="card-header uiheader d-flex justify-content-between align-items-center">Info</h3>
                         <div class="card-body uibg">
                             <div id="buildingDetails" class="list-group">
